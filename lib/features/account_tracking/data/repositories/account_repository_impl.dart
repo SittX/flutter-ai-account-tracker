@@ -1,6 +1,7 @@
+import 'package:ai_tracker/core/constants/account_status.dart';
 import 'package:ai_tracker/features/account_tracking/data/datasources/account_local_data_source.dart';
 import 'package:ai_tracker/features/account_tracking/data/models/account_model.dart';
-import 'package:ai_tracker/features/account_tracking/domain/entities/account.dart';
+import 'package:ai_tracker/features/account_tracking/domain/entities/account_entity.dart';
 import 'package:ai_tracker/features/account_tracking/domain/repositories/account_repository.dart';
 
 class AccountRepositoryImpl extends AccountRepository {
@@ -9,7 +10,7 @@ class AccountRepositoryImpl extends AccountRepository {
   AccountRepositoryImpl({required this.accountLocalDateSource});
 
   @override
-  Future<Account> createNewAccount(Account account) async {
+  Future<AccountEntity> createNewAccount(AccountEntity account) async {
     final AccountModel createPayload = AccountModel(
       id: account.id,
       name: account.name,
@@ -18,6 +19,8 @@ class AccountRepositoryImpl extends AccountRepository {
       status: account.status,
       isActive: account.isActive,
       lastUsedDate: account.lastUsedDate,
+      createdDateTime: account.createdDateTime,
+      updatedDateTime: account.updatedDateTime,
     );
 
     final AccountModel createdModel = await accountLocalDateSource
@@ -27,13 +30,13 @@ class AccountRepositoryImpl extends AccountRepository {
   }
 
   @override
-  Future<Account> getAccountById(int id) async {
+  Future<AccountEntity> getAccountById(int id) async {
     final futureAccount = await accountLocalDateSource.fetchById(id);
     return futureAccount.toEntity();
   }
 
   @override
-  Future<List<Account>> getAccounts() async {
+  Future<List<AccountEntity>> getAccounts() async {
     final accountList = await accountLocalDateSource.fetchAll();
 
     return accountList
@@ -42,12 +45,15 @@ class AccountRepositoryImpl extends AccountRepository {
   }
 
   @override
-  Future<Account> updateAccountInactive(int id) {
+  Future<AccountEntity> updateAccountInactive(int id) {
     throw UnimplementedError();
   }
 
   @override
-  Future<Account> updateExistingAccount(int id, Account account) async {
+  Future<AccountEntity> updateExistingAccount(
+    int id,
+    AccountEntity account,
+  ) async {
     final AccountModel updatePayload = AccountModel(
       id: account.id,
       name: account.name,
@@ -67,5 +73,10 @@ class AccountRepositoryImpl extends AccountRepository {
   @override
   Future<void> deleteAccount(int id) async {
     await accountLocalDateSource.deleteAccount(id);
+  }
+
+  @override
+  Future<void> updateAccountStatus(int id, AccountStatus status) async {
+    await accountLocalDateSource.updateAccountStatus(id, status);
   }
 }

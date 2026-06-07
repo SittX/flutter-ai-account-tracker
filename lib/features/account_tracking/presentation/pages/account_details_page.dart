@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/account_status.dart';
-import '../../domain/entities/account.dart';
+import '../../domain/entities/account_entity.dart';
 import '../notifiers/account_notifier.dart';
 
 class AccountDetailsPage extends StatefulWidget {
-  final Account account;
+  final AccountEntity account;
   final AccountNotifier accountNotifier;
   const AccountDetailsPage({
     super.key,
@@ -60,22 +60,23 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       });
 
       try {
-        final accountToSave = Account(
+        final accountToUpdate = AccountEntity(
           id: widget.account.id,
           name: _nameController.text.trim(),
           email: _emailController.text.trim(),
           description: _descriptionController.text.trim(),
           isActive: _isActive,
           status: _status,
+          updatedDateTime: DateTime.now(),
         );
 
         if (widget.account.id != null) {
           await widget.accountNotifier.updateAccount(
             widget.account.id!,
-            accountToSave,
+            accountToUpdate,
           );
         } else {
-          await widget.accountNotifier.addAccount(accountToSave);
+          await widget.accountNotifier.addAccount(accountToUpdate);
         }
 
         if (!mounted) return;
@@ -98,6 +99,25 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         }
       }
     }
+  }
+
+  void _showDeleteConfirmDialog(int id) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Delete Account?"),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => widget.accountNotifier.deleteAccount(id),
+            child: const Text("Delete"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -196,7 +216,29 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text("Save"),
+                    : const Text("Update"),
+              ),
+              ElevatedButton(
+                onPressed: _isLoading
+                    ? null
+                    : () {
+                        _showDeleteConfirmDialog(widget.account.id!);
+                      },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  backgroundColor: Colors.red,
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Row(
+                        mainAxisAlignment: .center,
+                        spacing: 10,
+                        children: [Text("Delete"), Icon(Icons.delete)],
+                      ),
               ),
             ],
           ),

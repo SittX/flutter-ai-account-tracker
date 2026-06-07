@@ -1,18 +1,20 @@
-import 'package:ai_tracker/features/account_tracking/domain/entities/account.dart';
+import 'package:ai_tracker/features/account_tracking/domain/entities/account_entity.dart';
 import 'package:ai_tracker/features/account_tracking/domain/repositories/account_repository.dart';
 import 'package:flutter/foundation.dart';
+
+import '../../../../core/constants/account_status.dart';
 
 class AccountNotifier extends ChangeNotifier {
   final AccountRepository _repository;
 
   AccountNotifier({required this._repository});
 
-  List<Account> _accounts = [];
+  List<AccountEntity> _accounts = [];
   bool _isLoading = false;
   String? _errorMessage;
 
   // Getters
-  List<Account> get accounts => _accounts;
+  List<AccountEntity> get accounts => _accounts;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
 
@@ -24,7 +26,7 @@ class AccountNotifier extends ChangeNotifier {
     if (_accounts.isNotEmpty) return;
 
     try {
-      List<Account> fetchAccounts = await _repository.getAccounts();
+      List<AccountEntity> fetchAccounts = await _repository.getAccounts();
       _accounts = [..._accounts, ...fetchAccounts];
       _isLoading = false;
       notifyListeners();
@@ -35,7 +37,7 @@ class AccountNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> addAccount(Account account) async {
+  Future<void> addAccount(AccountEntity account) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -52,7 +54,7 @@ class AccountNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> updateAccount(int id, Account account) async {
+  Future<void> updateAccount(int id, AccountEntity account) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -66,6 +68,29 @@ class AccountNotifier extends ChangeNotifier {
       if (index != -1) {
         _accounts[index] = updatedAccount;
       }
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateAccountStatus(int id, AccountStatus status) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.updateAccountStatus(id, status);
+      _accounts = _accounts.map((account) {
+        if (account.id == id) {
+          return account.copyWith(status: status);
+        }
+        return account;
+      }).toList();
+
       _isLoading = false;
       notifyListeners();
     } catch (e) {

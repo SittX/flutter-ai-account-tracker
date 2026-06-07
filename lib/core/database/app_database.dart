@@ -1,6 +1,6 @@
 import "package:ai_tracker/features/account_tracking/data/models/account_model.dart";
-import "package:sqflite/sqflite.dart";
 import "package:path/path.dart";
+import "package:sqflite/sqflite.dart";
 
 class AppDatabase {
   AppDatabase._internal();
@@ -24,7 +24,7 @@ class AppDatabase {
 
     return await (openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE $tableName(
@@ -34,9 +34,25 @@ class AppDatabase {
             $emailField $textTypeUnique,
             $statusField $textType,
             $isActiveField $intTypeNotNullDefaultZero,             
-            $lastUsedDateField $textType 
+            $lastUsedDateField $textType,
+            $nextAvailableDateField $textType,
+            $createdDateTimeField $textType,
+            $updatedDateTimeField $textType
           );
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(
+            'ALTER TABLE $tableName ADD COLUMN $nextAvailableDateField $textType',
+          );
+          await db.execute(
+            'ALTER TABLE $tableName ADD COLUMN $createdDateTimeField $textType',
+          );
+          await db.execute(
+            'ALTER TABLE $tableName ADD COLUMN $updatedDateTimeField $textType',
+          );
+        }
       },
     ));
   }

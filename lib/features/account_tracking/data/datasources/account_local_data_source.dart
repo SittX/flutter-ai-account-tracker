@@ -1,6 +1,8 @@
 import 'package:ai_tracker/core/database/app_database.dart';
 import 'package:ai_tracker/features/account_tracking/data/models/account_model.dart';
 
+import '../../../../core/constants/account_status.dart';
+
 class AccountLocalDataSource {
   AccountLocalDataSource();
 
@@ -57,6 +59,24 @@ class AccountLocalDataSource {
     );
 
     return data.id == null ? data.copyWith(id: id) : data;
+  }
+
+  Future<int> updateAccountStatus(int id, AccountStatus status) async {
+    if (id <= 0) throw Exception("Account ID cannot be <= zero : $id");
+
+    final db = await AppDatabase().database;
+
+    final affectedRows = await db.update(
+      tableName,
+      {
+        statusField: status.name,
+        updatedDateTimeField: DateTime.now().toIso8601String(),
+      },
+      where: "$idField = ?",
+      whereArgs: [id],
+    );
+
+    return affectedRows;
   }
 
   Future<int> deleteAccount(int id) async {

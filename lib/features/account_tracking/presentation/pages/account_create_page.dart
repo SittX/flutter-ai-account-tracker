@@ -2,7 +2,7 @@ import 'package:ai_tracker/core/constants/account_status.dart';
 import 'package:ai_tracker/features/account_tracking/presentation/notifiers/account_notifier.dart';
 import 'package:flutter/material.dart';
 
-import '../../domain/entities/account.dart';
+import '../../domain/entities/account_entity.dart';
 
 class AccountCreatePage extends StatefulWidget {
   final AccountNotifier accountNotifier;
@@ -46,12 +46,13 @@ class _AccountCreatePageState extends State<AccountCreatePage> {
       });
 
       try {
-        final accountToSave = Account(
+        final accountToSave = AccountEntity(
           name: _nameController.text.trim(),
           email: _emailController.text.trim(),
           description: _descriptionController.text.trim(),
           isActive: _isActive,
           status: _status,
+          createdDateTime: DateTime.now(),
         );
 
         await widget.accountNotifier.addAccount(accountToSave);

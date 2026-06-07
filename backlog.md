@@ -8,7 +8,7 @@
 - Search by email and name
 - Filter by Account Status and Last used date 
 
-**Notes: ListTile swipe actions (startToEnd: available, endToStart: limit-hit)**
+[Done] **Notes: ListTile swipe actions (startToEnd: available, endToStart: limit-hit)** 
 
 ### Account Create/Update Features
 - Last used date (read-only and update when account status changed)
