@@ -44,36 +44,39 @@ class _AccountListPageState extends State<AccountListPage> {
           ),
         ),
       ),
-      body: ListenableBuilder(
-        listenable: widget.notifier,
-        builder: (context, child) {
-          if (widget.notifier.isLoading && widget.notifier.accounts.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: ListenableBuilder(
+          listenable: widget.notifier,
+          builder: (context, child) {
+            if (widget.notifier.isLoading && widget.notifier.accounts.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (widget.notifier.errorMessage != null) {
-            return Center(
-              child: Text('Error: ${widget.notifier.errorMessage}'),
-            );
-          }
-
-          final accounts = widget.notifier.accounts;
-
-          if (accounts.isEmpty) {
-            return const Center(child: Text('No accounts found. Add one!'));
-          }
-
-          return ListView.builder(
-            itemCount: accounts.length,
-            itemBuilder: (context, index) {
-              final data = accounts[index];
-              return AccountDismissableWidget(
-                notifier: widget.notifier,
-                account: data,
+            if (widget.notifier.errorMessage != null) {
+              return Center(
+                child: Text('Error: ${widget.notifier.errorMessage}'),
               );
-            },
-          );
-        },
+            }
+
+            final accounts = widget.notifier.accounts;
+
+            if (accounts.isEmpty) {
+              return const Center(child: Text('No accounts found. Add one!'));
+            }
+
+            return ListView.builder(
+              itemCount: accounts.length,
+              itemBuilder: (context, index) {
+                final data = accounts[index];
+                return AccountDismissableWidget(
+                  notifier: widget.notifier,
+                  account: data,
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
