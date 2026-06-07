@@ -48,7 +48,13 @@ class _AccountDismissableWidgetState extends State<AccountDismissableWidget> {
     return ListTile(
       textColor: isAccountAvailable ? Colors.white : Colors.white38,
       title: Text(data.name),
-      subtitle: Text(data.email),
+      subtitle: Text(
+        data.email,
+        style: TextStyle(
+          color: isAccountAvailable ? Colors.white70 : Colors.white38,
+          fontStyle: FontStyle.italic,
+        ),
+      ),
       contentPadding: EdgeInsets.all(10),
       trailing: isAccountAvailable
           ? Icon(Icons.check_circle_rounded, color: Colors.green)
@@ -77,7 +83,7 @@ class _AccountDismissableWidgetState extends State<AccountDismissableWidget> {
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Row(
-            mainAxisAlignment: .start,
+            mainAxisAlignment: MainAxisAlignment.start,
             spacing: 10.0,
             children: [
               Icon(Icons.check),
@@ -91,7 +97,7 @@ class _AccountDismissableWidgetState extends State<AccountDismissableWidget> {
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Row(
-            mainAxisAlignment: .end,
+            mainAxisAlignment: MainAxisAlignment.end,
             spacing: 10.0,
             children: [
               Text("Limit Hit", style: TextStyle(fontWeight: FontWeight.bold)),

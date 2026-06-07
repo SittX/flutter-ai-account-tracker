@@ -19,6 +19,7 @@ class AccountRepositoryImpl extends AccountRepository {
       status: account.status,
       isActive: account.isActive,
       lastUsedDate: account.lastUsedDate,
+      nextAvailableDate: account.nextAvailableDate,
       createdDateTime: account.createdDateTime,
       updatedDateTime: account.updatedDateTime,
     );
@@ -62,6 +63,8 @@ class AccountRepositoryImpl extends AccountRepository {
       status: account.status,
       isActive: account.isActive,
       lastUsedDate: account.lastUsedDate,
+      nextAvailableDate: account.nextAvailableDate,
+      updatedDateTime: account.updatedDateTime,
     );
 
     final AccountModel updatedModel = await accountLocalDateSource

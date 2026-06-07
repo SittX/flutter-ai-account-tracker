@@ -21,6 +21,7 @@ class _AccountCreatePageState extends State<AccountCreatePage> {
   final TextEditingController _emailController = TextEditingController();
   bool _isActive = true;
   AccountStatus _status = AccountStatus.available;
+  DateTime? _nextAvailableDate;
 
   bool _isLoading = false;
 
@@ -30,6 +31,19 @@ class _AccountCreatePageState extends State<AccountCreatePage> {
     _descriptionController.dispose();
     _emailController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDate() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2027),
+    );
+
+    setState(() {
+      _nextAvailableDate = pickedDate;
+    });
   }
 
   // ? Create an State Map with on/off key
@@ -52,6 +66,7 @@ class _AccountCreatePageState extends State<AccountCreatePage> {
           description: _descriptionController.text.trim(),
           isActive: _isActive,
           status: _status,
+          nextAvailableDate: _nextAvailableDate,
           createdDateTime: DateTime.now(),
         );
 
@@ -88,7 +103,7 @@ class _AccountCreatePageState extends State<AccountCreatePage> {
         child: Form(
           key: _formKey,
           child: Column(
-            spacing: 15.0,
+            spacing: 30.0,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
@@ -130,23 +145,31 @@ class _AccountCreatePageState extends State<AccountCreatePage> {
                   return null;
                 },
               ),
-              const Text(
-                "Status",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Wrap(
-                spacing: 8.0,
-                children: AccountStatus.values.map((s) {
-                  return ChoiceChip(
-                    label: Text(s.value),
-                    selected: _status == s,
-                    onSelected: (bool selected) {
-                      setState(() {
-                        _status = s;
-                      });
-                    },
-                  );
-                }).toList(),
+
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 10,
+                children: [
+                  const Text(
+                    "Status",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Wrap(
+                    spacing: 8.0,
+                    children: AccountStatus.values.map((s) {
+                      return ChoiceChip(
+                        label: Text(s.value),
+                        selected: _status == s,
+                        onSelected: (bool selected) {
+                          setState(() {
+                            _status = s;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
               Row(
                 spacing: 10.0,
@@ -163,7 +186,34 @@ class _AccountCreatePageState extends State<AccountCreatePage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 10,
+                children: [
+                  if (_nextAvailableDate != null)
+                    Text(
+                      "Next Available Date: ${_nextAvailableDate?.toIso8601String().split("T")[0]}",
+                    ),
+                  ElevatedButton(
+                    onPressed: _selectDate,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 10,
+                        children: [
+                          Text("Next Available Date"),
+                          Icon(Icons.calendar_month),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               ElevatedButton(
                 onPressed: _isLoading ? null : _saveAccount,
                 style: ElevatedButton.styleFrom(

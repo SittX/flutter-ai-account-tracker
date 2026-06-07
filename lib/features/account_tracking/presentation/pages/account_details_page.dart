@@ -26,6 +26,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   final TextEditingController _emailController = TextEditingController();
   bool _isActive = true;
   AccountStatus _status = AccountStatus.available;
+  DateTime? _nextAvailableDate;
 
   bool _isLoading = false;
 
@@ -37,6 +38,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     _emailController.text = widget.account.email;
     _isActive = widget.account.isActive;
     _status = widget.account.status ?? AccountStatus.available;
+    _nextAvailableDate = widget.account.nextAvailableDate;
   }
 
   @override
@@ -53,7 +55,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         WidgetState.any: Icon(Icons.close),
       });
 
-  Future<void> _saveAccount() async {
+  Future<void> _updateAccount() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -67,6 +69,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
           description: _descriptionController.text.trim(),
           isActive: _isActive,
           status: _status,
+          nextAvailableDate: _nextAvailableDate,
           updatedDateTime: DateTime.now(),
         );
 
@@ -101,23 +104,70 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     }
   }
 
+  Future<void> _selectDate() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _nextAvailableDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2027),
+    );
+
+    setState(() {
+      _nextAvailableDate = pickedDate;
+    });
+  }
+
   void _showDeleteConfirmDialog(int id) async {
-    await showDialog(
+    final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Delete Account?"),
+        title: const Text("Delete Account?"),
+        content: const Text(
+          "Are you sure you want to delete this account? This action cannot be undone.",
+        ),
         actions: [
-          ElevatedButton(
+          TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: const Text("Cancel"),
           ),
-          ElevatedButton(
-            onPressed: () => widget.accountNotifier.deleteAccount(id),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text("Delete"),
           ),
         ],
       ),
     );
+
+    if (confirmed == true) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        await widget.accountNotifier.deleteAccount(id);
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Account deleted successfully!')),
+        );
+
+        // Pop back to the list page
+        Navigator.of(context).pop();
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error deleting account: ${e.toString()}')),
+        );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
   }
 
   @override
@@ -129,7 +179,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         child: Form(
           key: _formKey,
           child: Column(
-            spacing: 15.0,
+            spacing: 30.0,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
@@ -171,23 +221,31 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                   return null;
                 },
               ),
-              const Text(
-                "Status",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Wrap(
-                spacing: 8.0,
-                children: AccountStatus.values.map((s) {
-                  return ChoiceChip(
-                    label: Text(s.value),
-                    selected: _status == s,
-                    onSelected: (bool selected) {
-                      setState(() {
-                        _status = s;
-                      });
-                    },
-                  );
-                }).toList(),
+
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 10,
+                children: [
+                  const Text(
+                    "Status",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Wrap(
+                    spacing: 8.0,
+                    children: AccountStatus.values.map((s) {
+                      return ChoiceChip(
+                        label: Text(s.value),
+                        selected: _status == s,
+                        onSelected: (bool selected) {
+                          setState(() {
+                            _status = s;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
               Row(
                 spacing: 10.0,
@@ -204,9 +262,36 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 5,
+                children: [
+                  if (_nextAvailableDate != null)
+                    Text(
+                      "Next Available Date: ${_nextAvailableDate?.toIso8601String().split("T")[0]}",
+                    ),
+                  ElevatedButton(
+                    onPressed: _selectDate,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 10,
+                        children: [
+                          Text("Next Available Date"),
+                          Icon(Icons.calendar_month),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               ElevatedButton(
-                onPressed: _isLoading ? null : _saveAccount,
+                onPressed: _isLoading ? null : _updateAccount,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
@@ -235,7 +320,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : Row(
-                        mainAxisAlignment: .center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         spacing: 10,
                         children: [Text("Delete"), Icon(Icons.delete)],
                       ),
