@@ -2,19 +2,48 @@ import 'package:ai_tracker/features/account_tracking/presentation/notifiers/acco
 import 'package:flutter/material.dart';
 
 // TODO: onPress displays ModelDialog and display filtering options (status, type, etc)
-class AccountListFilterIconButton extends StatefulWidget {
+class AccountPopupMenuButton extends StatefulWidget {
   final AccountNotifier notifier;
-  const AccountListFilterIconButton({super.key, required this.notifier});
+  const AccountPopupMenuButton({super.key, required this.notifier});
 
   @override
-  State<AccountListFilterIconButton> createState() =>
-      _AccountListFilterIconButtonState();
+  State<AccountPopupMenuButton> createState() => _AccountPopupMenuButtonState();
 }
 
-class _AccountListFilterIconButtonState
-    extends State<AccountListFilterIconButton> {
+class _AccountPopupMenuButtonState extends State<AccountPopupMenuButton> {
   @override
   Widget build(BuildContext context) {
-    return IconButton(onPressed: () {}, icon: Icon(Icons.filter_alt_sharp));
+    return PopupMenuButton(
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          child: Row(children: [Icon(Icons.filter_alt_sharp), Text("Filter")]),
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              builder: (BuildContext context) {
+                return Container(
+                  height: 200,
+                  child: Center(child: Text('This is a Modal Bottom Sheet')),
+                );
+              },
+            );
+          },
+        ),
+        PopupMenuItem(
+          child: const Text("Two"),
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              builder: (BuildContext context) {
+                return Container(
+                  height: 200,
+                  child: Center(child: Text('This is a Modal Bottom Sheet')),
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
   }
 }

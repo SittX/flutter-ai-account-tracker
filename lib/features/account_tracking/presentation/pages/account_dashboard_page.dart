@@ -10,6 +10,14 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text("Dashboard"));
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Dashboard",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+        ),
+      ),
+      body: Center(child: Text("Dashboard")),
+    );
   }
 }

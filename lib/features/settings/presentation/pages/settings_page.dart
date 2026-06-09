@@ -10,6 +10,14 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text("Settings Page"));
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Settings",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+        ),
+      ),
+      body: Center(child: Text("Settings Page")),
+    );
   }
 }

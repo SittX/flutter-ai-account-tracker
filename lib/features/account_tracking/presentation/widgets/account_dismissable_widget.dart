@@ -42,6 +42,27 @@ class _AccountDismissableWidgetState extends State<AccountDismissableWidget> {
     }
   }
 
+  Widget? _getAccountStatus(AccountStatus status) {
+    switch (status) {
+      case AccountStatus.available:
+        return Chip(
+          avatar: CircleAvatar(
+            backgroundColor: Colors.green.shade800,
+            child: const Text("A"),
+          ),
+          label: Text("Available"),
+        );
+      case AccountStatus.limitHit:
+        return Chip(
+          avatar: CircleAvatar(
+            backgroundColor: Colors.red.shade800,
+            child: const Text('L'),
+          ),
+          label: Text("Limit Hit"),
+        );
+    }
+  }
+
   Widget _accountTile(BuildContext context, AccountEntity data) {
     final isAccountAvailable = data.status == AccountStatus.available;
 
@@ -56,9 +77,7 @@ class _AccountDismissableWidgetState extends State<AccountDismissableWidget> {
         ),
       ),
       contentPadding: EdgeInsets.all(10),
-      trailing: isAccountAvailable
-          ? Icon(Icons.check_circle_rounded, color: Colors.green)
-          : Icon(Icons.not_interested_rounded, color: Colors.red),
+      trailing: _getAccountStatus(data.status!),
       onTap: () {
         Navigator.push(
           context,
